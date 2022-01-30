@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { serialize, Serialize } from '../src';
 
 class TestClass {

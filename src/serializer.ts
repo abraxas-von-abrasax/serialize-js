@@ -1,18 +1,21 @@
-import { METADATA_KEY } from './util';
+import { Reflector } from './reflector';
 
 export function serialize<T = any>(obj: any): T | null {
-    if (!Reflect.hasMetadata(METADATA_KEY, obj)) {
+    const reflector = Reflector.getInstance();
+    const proto = Object.getPrototypeOf(obj);
+    const metadata = reflector.getMetadata(proto);
+
+    if (!metadata) {
         return null;
     }
 
-    const metadata = Reflect.getMetadata(METADATA_KEY, obj);
     const result = {};
 
     for (const entry of metadata) {
         (result as any)[entry] = processMetadataEntry(entry, obj);
     }
 
-    Object.setPrototypeOf(result, obj.__proto__);
+    Object.setPrototypeOf(result, proto);
 
     return result as T;
 }
@@ -21,19 +24,18 @@ function processMetadataEntry(entry: string, obj: any): any {
     const el = obj[entry];
     const isArray = Array.isArray(el);
 
-    let computed;
+    return !isArray
+        ? processSingleField(el)
+        : el.map(elItem => processSingleField(elItem));
+}
 
-    if (!isArray) {
-        computed = typeof el === 'object' && Reflect.hasMetadata(METADATA_KEY, el) ? serialize(el) : el;
-    } else {
-        computed = [];
-        for (const elItem of el) {
-            const elItemComputed = typeof elItem === 'object' && Reflect.hasMetadata(METADATA_KEY, elItem)
-                ? serialize(elItem)
-                : elItem;
-            computed.push(elItemComputed);
-        }
+function processSingleField(el: any) {
+    if (el === null || el === undefined) {
+        return el;
     }
 
-    return computed;
+    const reflector = Reflector.getInstance();
+    const proto = Object.getPrototypeOf(el);
+
+    return typeof el === 'object' && reflector.getMetadata(proto) ? serialize(el) : el;
 }

@@ -1,13 +1,10 @@
-import { METADATA_KEY } from './util';
+import { Reflector } from './reflector';
 
 export function Serialize() {
     return function (target: any, value: any) {
-        const metadata = Reflect.hasMetadata(METADATA_KEY, target)
-            ? Reflect.getMetadata(METADATA_KEY, target)
-            : [];
-
+        const reflector = Reflector.getInstance();
+        const metadata = reflector.getMetadata(target) ?? [];
         metadata.push(value);
-
-        Reflect.defineMetadata(METADATA_KEY, metadata, target);
+        reflector.setMetadata(target, metadata);
     };
 }

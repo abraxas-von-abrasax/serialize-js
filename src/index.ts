@@ -1,10 +1,16 @@
+import { Serialize } from './decorators';
+import { serialize } from './serializer';
+
 export * from './decorators';
 export * from './serializer';
 
-declare global {
-    namespace Reflect {
-        function hasMetadata(key: string, target: any): any;
-        function getMetadata(key: string, target: any): any;
-        function defineMetadata(key: string, metadata: any, target: any): void;
-    }
+class Test {
+    @Serialize() message = 'Hello world';
+    @Serialize() answer = 42;
+    @Serialize() uninitialized: string;
+    password = 'secret_password';
 }
+
+const test = new Test();
+const serialized = serialize(test);
+console.log(serialized);
