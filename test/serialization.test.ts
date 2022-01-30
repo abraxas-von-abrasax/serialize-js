@@ -1,4 +1,4 @@
-import { serialize, Serialize } from '../src';
+import { transform, Serialize } from '../src';
 
 class TestClass {
     @Serialize() message: string;
@@ -25,7 +25,7 @@ describe('Test serialization', () => {
     it('should serialize only decorated values', () => {
         const instance = new TestClass();
         instance.message = 'Hello world';
-        const serialized = serialize(instance);
+        const serialized = transform(instance);
         expect(serialized).toBeInstanceOf(TestClass);
         expect(serialized.message).toBe('Hello world');
         expect(typeof serialized.answer).toBe('number');
@@ -49,7 +49,7 @@ describe('Test serialization', () => {
         complex.singleTest = singleTest;
         complex.tests = [test1, test2];
         complex.numbers = numbers;
-        const serialized = serialize(complex);
+        const serialized = transform(complex);
 
         expect(serialized).toBeInstanceOf(ComplexTestClass);
         expect(serialized.singleTest).toBeInstanceOf(TestClass);
@@ -84,7 +84,7 @@ describe('Test serialization', () => {
     it('should return null for unserializable objects', () => {
         class Empty {}
         const instance = new Empty();
-        const serialized = serialize(instance);
+        const serialized = transform(instance);
         expect(serialized).toBe(null);
     })
 });

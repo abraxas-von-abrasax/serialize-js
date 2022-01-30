@@ -1,6 +1,6 @@
 import { Reflector } from './reflector';
 
-export function serialize<T = any>(obj: any): T | null {
+export function transform<T = any>(obj: any): T | null {
     const reflector = Reflector.getInstance();
     const proto = Object.getPrototypeOf(obj);
     const metadata = reflector.getMetadata(proto);
@@ -37,5 +37,5 @@ function processSingleField(el: any) {
     const reflector = Reflector.getInstance();
     const proto = Object.getPrototypeOf(el);
 
-    return typeof el === 'object' && reflector.getMetadata(proto) ? serialize(el) : el;
+    return typeof el === 'object' && reflector.getMetadata(proto) ? transform(el) : el;
 }

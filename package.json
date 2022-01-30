@@ -5,6 +5,7 @@
     "scripts": {
         "start": "npm run build && node dist/index.js",
         "test": "jest --coverage",
+        "test:watch": "jest --watch",
         "build": "tsc || exit 1"
     },
     "author": "",
