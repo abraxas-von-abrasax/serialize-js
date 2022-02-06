@@ -12,7 +12,7 @@ class ComplexTestClass {
     @Serialize() numbers: number[];
 }
 
-describe('Test serialization', () => {
+describe('Transformation tests', () => {
     it('class-instances should look as expected after member decoration', () => {
         const instance = new TestClass();
         expect(instance).toBeInstanceOf(TestClass);
@@ -22,7 +22,7 @@ describe('Test serialization', () => {
         expect(instance.secretPassword).toBe('password');
     });
 
-    it('should serialize only decorated values', () => {
+    it('should transform only decorated values', () => {
         const instance = new TestClass();
         instance.message = 'Hello world';
         const serialized = transform(instance);
@@ -33,7 +33,7 @@ describe('Test serialization', () => {
         expect(serialized.secretPassword).toBeUndefined();
     });
 
-    it('should serialize objects with arrays correctly', () => {
+    it('should transform objects with arrays correctly', () => {
         const singleTest = new TestClass();
         singleTest.message = 'Hello single';
 
@@ -81,10 +81,25 @@ describe('Test serialization', () => {
         expect(serializedTest2.secretPassword).toBeUndefined();
     });
 
-    it('should return null for unserializable objects', () => {
+    it('should return null for not transformable objects', () => {
         class Empty {}
+
         const instance = new Empty();
         const serialized = transform(instance);
         expect(serialized).toBe(null);
-    })
+    });
+
+    it('should transform null values correctly', () => {
+        class Test {
+            @Serialize()
+            test = 42;
+            @Serialize()
+            nullVal = null;
+        }
+
+        const instance = new Test();
+        const serialized = transform(instance);
+        expect(serialized.test).toBe(42);
+        expect(serialized.nullVal).toBe(null);
+    });
 });
