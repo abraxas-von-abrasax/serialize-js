@@ -1,18 +1,19 @@
-import { Reflector } from './reflector';
+import { Reflector } from './reflection';
+import { SerializationProp } from './reflection/types';
 
 export function transform<T = any>(obj: any): T | null {
     const reflector = Reflector.getInstance();
     const proto = Object.getPrototypeOf(obj);
-    const metadata = reflector.getMetadata(proto);
+    const metadata = reflector.getMeta(proto, 'ser_props');
 
-    if (!metadata) {
+    if (!metadata.length) {
         return null;
     }
 
-    const result = {};
+    const result: any = {};
 
     for (const entry of metadata) {
-        (result as any)[entry] = processMetadataEntry(entry, obj);
+        result[entry.value] = processMetadataEntry(entry, obj);
     }
 
     Object.setPrototypeOf(result, proto);
@@ -20,8 +21,8 @@ export function transform<T = any>(obj: any): T | null {
     return result as T;
 }
 
-function processMetadataEntry(entry: string, obj: any): any {
-    const el = obj[entry];
+function processMetadataEntry(entry: SerializationProp, obj: any): any {
+    const el = obj[entry.value];
     const isArray = Array.isArray(el);
 
     return !isArray
@@ -37,5 +38,5 @@ function processSingleField(el: any) {
     const reflector = Reflector.getInstance();
     const proto = Object.getPrototypeOf(el);
 
-    return typeof el === 'object' && reflector.getMetadata(proto) ? transform(el) : el;
+    return typeof el === 'object' && reflector.getMeta(proto, 'ser_props').length ? transform(el) : el;
 }
