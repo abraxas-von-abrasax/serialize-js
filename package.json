@@ -8,8 +8,8 @@
         "test:watch": "jest --watch",
         "build": "tsc || exit 1"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "Nenad Petkovic",
+    "license": "MIT",
     "devDependencies": {
         "@types/jest": "^27.4.0",
         "@types/node": "^17.0.15",
