@@ -6,7 +6,6 @@ import {
     ComplexListSerializationProp,
     SimpleListSerializationProp,
 } from './reflection/types';
-import { Constructor } from './utils';
 
 export function Serialize(): PropertyDecorator {
     return function (target: any, value: any): void {
@@ -21,7 +20,7 @@ export function Deserialize(): PropertyDecorator {
     };
 }
 
-export function DeserializeAs(type: Constructor): PropertyDecorator {
+export function DeserializeAs(type: new (...args: any[]) => any): PropertyDecorator {
     return function (target: any, propertyKey: string | symbol): void {
         const reflector = Reflector.getInstance();
         const proto = type.prototype;
@@ -38,7 +37,7 @@ export function DeserializeAs(type: Constructor): PropertyDecorator {
     };
 }
 
-export function DeserializeArray(type?: Constructor): PropertyDecorator {
+export function DeserializeArray(type?: new (...args: any[]) => any): PropertyDecorator {
     return function (target: any, propertyKey: string | symbol) {
         const reflector = Reflector.getInstance();
 

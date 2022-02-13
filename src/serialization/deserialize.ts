@@ -1,4 +1,3 @@
-import { Constructor } from '../utils';
 import { Reflector } from '../reflection';
 import { isComplex, isList } from '../reflection/util';
 import {
@@ -9,24 +8,34 @@ import {
     ComplexSerializationProp,
 } from '../reflection/types';
 
-export function deserialize<T>(target: any, type: Constructor): T {
-    const reflector = Reflector.getInstance();
-    const proto = type.prototype;
-    const props = reflector.getMeta(proto, 'deser_props');
-    const res = extractFromTarget(target, props);
-    Object.setPrototypeOf(res, type.prototype);
-    return res;
+export function deserialize<T>(target: any, type: new (...args: any[]) => any): T {
+    const props = Reflector.getInstance().getMeta(type.prototype, 'deser_props');
+    return extractFromTarget(target, props, createClassObject(type));
 }
 
-function extractFromTarget(target: any, props: SerializationProp[]) {
-    const result: any = {};
+function createClassObject<T>(type: new (...args: any[]) => any): T | undefined {
+    try {
+        return new type();
+    } catch (error) {
+        // Cannot construct object. Ignore this case silently and return null
+        return undefined;
+    }
+}
 
+/**
+ * Extracts decorated properties from target object and adds them to source (the source object will be mutated after
+ * this call!)
+ * @param target raw object
+ * @param props serialization props
+ * @param source class object (will be mutated!)
+ */
+function extractFromTarget(target: any, props: SerializationProp[], source: any) {
     for (const prop of props) {
         const key = prop.value;
         const el = target[key];
 
         if (el === undefined) {
-            return undefined;
+            continue;
         }
 
         let propRes;
@@ -40,36 +49,30 @@ function extractFromTarget(target: any, props: SerializationProp[]) {
         }
 
         if (propRes !== undefined) {
-            result[key] = propRes;
+            source[key] = propRes;
         }
     }
 
-    return result;
+    return source;
 }
 
 function processComplex(target: any, prop: ComplexSerializationProp): any {
     const refProps = Reflector.getInstance().getProps(prop.ref, 'deser_props');
-    const obj = extractFromTarget(target, refProps);
-    Object.setPrototypeOf(obj, prop.proto);
-    return obj;
+    return extractFromTarget(target, refProps, createClassObject(prop.proto.constructor as any));
 }
 
 function processList(target: any, prop: SimpleListSerializationProp | ComplexListSerializationProp) {
     const reflector = Reflector.getInstance();
 
     if (prop.listType === SerializationPropType.SIMPLE) {
+        // Objects have a simple type
         return [...target];
     }
 
+    // Objects have a complex type
     const itemProps = reflector.getProps(prop.listType, 'deser_props');
 
-    const mapper = (item: any) => {
-        const obj = extractFromTarget(item, itemProps);
-        if (obj) {
-            Object.setPrototypeOf(obj, prop.proto);
-        }
-        return obj;
-    };
+    const mapper = (item: any) => extractFromTarget(item, itemProps, createClassObject(prop.proto.constructor as any));
 
     return target
         .map(mapper)

@@ -1,27 +1,7 @@
-import { transform, Serialize } from '../src';
-
-class TestClass {
-    @Serialize() message: string;
-    @Serialize() answer = 42;
-    secretPassword = 'password';
-}
-
-class ComplexTestClass {
-    @Serialize() singleTest: TestClass;
-    @Serialize() tests: TestClass[];
-    @Serialize() numbers: number[];
-}
+import { transform, Serialize, deserialize, Deserialize } from '../src';
+import { TestClass, ComplexTestClass, testObj } from './test-data';
 
 describe('Transformation tests', () => {
-    it('class-instances should look as expected after member decoration', () => {
-        const instance = new TestClass();
-        expect(instance).toBeInstanceOf(TestClass);
-        expect(instance.message).toBeUndefined();
-        expect(typeof instance.answer).toBe('number');
-        expect(instance.answer).toBe(42);
-        expect(instance.secretPassword).toBe('password');
-    });
-
     it('should transform only decorated values', () => {
         const instance = new TestClass();
         instance.message = 'Hello world';
@@ -101,5 +81,59 @@ describe('Transformation tests', () => {
         const serialized = transform(instance);
         expect(serialized.test).toBe(42);
         expect(serialized.nullVal).toBe(null);
+    });
+
+    it('should create class-objects correctly', () => {
+        const defaultSingleTest = new TestClass();
+
+        const obj = deserialize<ComplexTestClass>(testObj, ComplexTestClass);
+
+        expect(obj).toBeInstanceOf(ComplexTestClass);
+        expect(obj.fn()).toBe('complex');
+
+        const singleTest = obj.singleTest;
+        expect(singleTest).toBeInstanceOf(TestClass);
+        expect(singleTest.message).toBe('Hello world');
+        expect(singleTest.answer).toBe(420);
+        expect(singleTest.secretPassword).toBe(defaultSingleTest.secretPassword);
+        expect(singleTest.fn()).toBe('simple');
+
+        expect(obj.tests).toHaveLength(2);
+        for (const test of obj.tests) {
+            expect(test).toBeInstanceOf(TestClass);
+            expect(test.fn()).toBe('simple');
+            expect(test.secretPassword).toBe(defaultSingleTest.secretPassword);
+        }
+        expect(obj.tests[0].message).toBe('one');
+        expect(obj.tests[0].answer).toBe(200);
+        expect(obj.tests[1].message).toBe('two');
+        expect(obj.tests[1].answer).toBe(defaultSingleTest.answer);
+
+        expect(obj.numbers).toBeUndefined();
+
+        expect(obj.strings).toHaveLength(3);
+        for (const str of obj.strings) {
+            expect(typeof str).toBe('string');
+        }
+        expect(obj.strings[0]).toBe('abc');
+        expect(obj.strings[1]).toBe('def');
+        expect(obj.strings[2]).toBe('ghi');
+    });
+
+    it('should cope with null object passed in as blueprint', () => {
+        const test = {
+            answer: 42,
+        };
+
+        class Test {
+            @Deserialize() answer: number;
+        }
+
+        const undefRes = deserialize(test, { prototype: null } as any);
+        expect(undefRes).toBeUndefined();
+
+        const compareRes = deserialize<Test>(test, Test);
+        expect(compareRes).toBeInstanceOf(Test);
+        expect(compareRes.answer).toBe(42);
     });
 });

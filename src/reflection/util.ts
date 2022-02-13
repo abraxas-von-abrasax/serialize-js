@@ -1,17 +1,11 @@
 import {
     SerializationProp,
-    SimpleSerializationProp,
     SerializationPropType,
     ComplexSerializationProp,
     ListSerializationProp,
     SimpleListSerializationProp,
     ComplexListSerializationProp,
 } from './types';
-
-export function isSimple(prop: SerializationProp): prop is SimpleSerializationProp {
-    const type = getType(prop);
-    return type !== null && type === SerializationPropType.SIMPLE;
-}
 
 export function isComplex(prop: SerializationProp): prop is ComplexSerializationProp {
     const type = getType(prop);

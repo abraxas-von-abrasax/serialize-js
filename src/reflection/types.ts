@@ -1,5 +1,3 @@
-import { Constructor } from '../utils';
-
 export const SerIDKey = 'ser_id';
 
 const METADATA_KEYS = ['ser_props', 'deser_props'] as const;
@@ -26,7 +24,7 @@ export interface SimpleSerializationProp extends SerializationProp {
 export interface ComplexSerializationProp extends SerializationProp {
     type: SerializationPropType.COMPLEX;
     ref: EntityID;
-    proto: Constructor;
+    proto: new (...args: any[]) => any;
 }
 
 export interface ListSerializationProp extends SerializationProp {
@@ -39,7 +37,7 @@ export interface SimpleListSerializationProp extends ListSerializationProp {
 
 export interface ComplexListSerializationProp extends ListSerializationProp {
     listType: EntityID;
-    proto: Constructor;
+    proto: new (...args: any[]) => any;
 }
 
 export enum SerializationPropType {

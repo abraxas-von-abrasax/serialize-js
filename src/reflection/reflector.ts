@@ -1,6 +1,5 @@
 import { Metadata, MetadataKey, SerializationProp, SerIDKey, EntityID, MetadataEntry } from './types';
 import * as crypto from 'crypto';
-import { inspect } from 'util';
 
 export class Reflector {
     private static _instance: Reflector | null = null;
@@ -19,6 +18,9 @@ export class Reflector {
     }
 
     static extractID(target: any): string | null {
+        if (!target) {
+            return null;
+        }
         return target[SerIDKey];
     }
 
@@ -63,13 +65,6 @@ export class Reflector {
         return id;
     }
 
-    printMeta() {
-        const entries = [...this._metadata.entries()];
-        for (const entry of entries) {
-            console.log(inspect(entry, true, null, true));
-        }
-    }
-
     private static _setID(target: any, id: string): void {
         Object.defineProperty(target, SerIDKey, { value: id });
     }
@@ -79,10 +74,6 @@ export class Reflector {
     }
 
     private _createEntry(id: EntityID): void {
-        if (this._metadata.has(id)) {
-            return;
-        }
-
         this._metadata.set(id, {
             ser_props: [],
             deser_props: [],
