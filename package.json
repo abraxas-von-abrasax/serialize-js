@@ -1,6 +1,6 @@
 {
     "name": "@enpi/serialize-js",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "",
     "scripts": {
         "start": "npm run build && node dist/index.js",
