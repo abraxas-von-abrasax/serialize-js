@@ -25,9 +25,7 @@ function processMetadataEntry(entry: SerializationProp, obj: any): any {
     const el = obj[entry.value];
     const isArray = Array.isArray(el);
 
-    return !isArray
-        ? processSingleField(el)
-        : el.map(elItem => processSingleField(elItem));
+    return !isArray ? processSingleField(el) : el.map(elItem => processSingleField(elItem));
 }
 
 function processSingleField(el: any) {
