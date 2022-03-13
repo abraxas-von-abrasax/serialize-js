@@ -1,6 +1,6 @@
 {
     "name": "@enpi/serialize-js",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "A simple JavaScript object serializer and transformer",
     "author": "Nenad Petkovic <root@nenad-petkovic.com>",
     "license": "MIT",
